@@ -1,0 +1,16 @@
+# Vercel deployment ignore
+.env.local
+.DS_Store
+Thumbs.db
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+ENV/
+env/
