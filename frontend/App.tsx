@@ -815,8 +815,8 @@ export default function App() {
                   </div>
                 ) : null}
 
-                {/* Confidence Metrics */}
-                {results?.confidenceMetrics && (
+                {/* Confidence Metrics - TEMPORARILY DISABLED */}
+                {/* {results?.confidenceMetrics && (
                   <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="flex items-center gap-2 mb-6">
                       <ShieldCheck className="w-5 h-5 text-indigo-600" />
@@ -868,7 +868,7 @@ export default function App() {
                       </p>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* AI Advisory Report */}
                 {advisory && (
