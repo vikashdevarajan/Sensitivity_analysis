@@ -8,24 +8,7 @@ class ProductContext(BaseModel):
     competitors: str  # Change from List[str] to str
 
 class MatrixData(BaseModel):
-    rows: int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+    rows: int    
     cols: int
     rowLabels: List[str]  # Car models: ["Baleno", "Polo", "i20"]
     colLabels: List[str]  # Criteria: ["Fuel", "Safety", "Tech", "Service", "Price"]
