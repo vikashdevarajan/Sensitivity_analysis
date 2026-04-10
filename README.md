@@ -8,7 +8,7 @@ A professional full-stack application for zero-sum game analysis, providing Nash
 
 - **Frontend**: React + TypeScript + Vite + Tailwind CSS
 - **Backend**: FastAPI + Python + Google Gemini AI
-- **Features**: Game theory calculations, AI strategic advisory, PDF export
+- **Features**: Game theory calculations, agentic AI data fetch, AI strategic advisory, MCP-friendly tool endpoints, PDF export
 
 ## Quick Start
 
@@ -69,22 +69,22 @@ chmod +x start-dev.sh
    ```
 
 5. **Start Services:**
-   ```bash
-   # Option 1: Start both together
-   npm run dev
+  
    
    # Option 2: Start individually
    # Terminal 1 - Backend
-   npm run dev:backend
+   cd  backend 
+   uvicorn main:app
    
-   # Terminal 2 - Frontend  
-   npm run dev:frontend
+   # Terminal 2 - Frontend 
+   cd frontend 
+   npm run dev
    ```
 
 ## Access Points
 
 - **Application**: http://localhost:3000
-- **API Server**: http://localhost:8000  
+- **API Server**: http://localhost:8000 
 - **API Documentation**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 
@@ -105,6 +105,35 @@ Analyzes game matrix and returns strategic recommendations.
     "colLabels": ["Response X", "Response Y"],
     "payoffs": [[10, -5], [-2, 8]]
   }
+}
+```
+
+### `POST /ai/fetch`
+Runs the agentic car-data fetch pipeline (Firecrawl + Gemini), quantizes metrics, and returns matrix data.
+
+**Request:**
+```json
+{
+   "prompt": "Baleno, i20, Swift",
+   "segment": "HATCHBACK"
+}
+```
+
+**Notes:**
+- `prompt` must contain exactly 3 comma-separated car names.
+- `segment` options: `HATCHBACK`, `COMPACT_SEDAN`, `MID_SIZE_SEDAN`, `COMPACT_SUV`, `MID_SIZE_SUV`.
+
+### `GET /mcp/explain`
+MCP helper endpoint describing tool purpose and input format for external agents.
+
+### `POST /mcp/tools/ai-fetch-summary`
+MCP-friendly tool endpoint that runs AI fetch + analysis and returns a compact plain-text summary (leader, market share, stability, risk, and quantized matrix).
+
+**Request:**
+```json
+{
+   "prompt": "Baleno, i20, Swift",
+   "segment": "HATCHBACK"
 }
 ```
 
@@ -163,8 +192,6 @@ Analyzes game matrix and returns strategic recommendations.
 │   ├── requirements.txt   # Python dependencies
 │   └── .env              # Backend environment variables
 ├── package.json           # Root workspace configuration
-├── start-dev.bat         # Windows startup script
-├── start-dev.sh          # Unix startup script
 └── README.md
 ```
 

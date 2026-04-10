@@ -23,6 +23,7 @@ import {
 import { MatrixData, AnalysisResults, AdvisoryReport, ConfidenceBreakdown, WeightSet } from './types';
 import { ApiService } from './services/apiService';
 import { BackendStatus } from './components/BackendStatus';
+import { AIFetchWidget } from './components/AIFetchWidget';
 import { 
   BarChart, 
   Bar, 
@@ -278,6 +279,23 @@ export default function App() {
               </div>
             </div>
 
+            {/* AI Fetch Widget */}
+            <AIFetchWidget
+              onApplyMatrix={(matrix) => {
+                setData(prev => ({
+                  ...prev,
+                  ...matrix,
+                  weights: prev.weights,
+                  yourProduct: matrix.rowLabels[0]
+                }));
+                setRows(matrix.rows);
+                setCols(matrix.cols);
+                setResults(null);
+                setAdvisory(null);
+              }}
+              onError={(message) => setError(message)}
+            />
+
             {/* Weight Controls */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -351,8 +369,8 @@ export default function App() {
               </div>
               
               <div className="text-xs text-slate-500 mb-4 p-3 bg-slate-50 rounded-lg">
-                <strong>Scoring Guide:</strong> Rate each option (1-10) on each criterion. 
-                Higher scores = better performance. Example: Fuel efficiency 9/10 = excellent mileage.
+                <strong>Scoring Guide:</strong> Rate each option (1-10) on each criterion.
+                Higher scores = better performance. Example: Mileage 9/10 = excellent efficiency.
               </div>
 
               {/* Options/Criteria Labels */}
@@ -393,12 +411,12 @@ export default function App() {
 
               {/* Score Matrix */}
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+                <table className="w-full min-w-[640px] border-collapse table-fixed">
                   <thead>
                     <tr className="bg-slate-100">
-                      <th className="p-3 text-left text-xs font-semibold text-slate-600 rounded-tl-lg">Options</th>
+                      <th className="w-[220px] p-3 text-left text-xs font-semibold text-slate-600 rounded-tl-lg">Options</th>
                       {data.colLabels.map((label, i) => (
-                        <th key={i} className={`p-3 text-center text-xs font-semibold text-slate-600 ${i === data.colLabels.length - 1 ? 'rounded-tr-lg' : ''}`}>
+                        <th key={i} className={`p-3 text-center text-xs font-semibold text-slate-600 whitespace-nowrap ${i === data.colLabels.length - 1 ? 'rounded-tr-lg' : ''}`}>
                           {label}
                         </th>
                       ))}
@@ -407,18 +425,20 @@ export default function App() {
                   <tbody>
                     {data.rowLabels.map((rowLabel, r) => (
                       <tr key={r} className="border-b border-slate-200">
-                        <td className="p-3 text-sm font-semibold text-slate-700 bg-slate-50">
-                          {rowLabel}
+                        <td className="w-[220px] p-3 text-sm font-semibold text-slate-700 bg-slate-50 align-middle">
+                          <span className="block max-w-[200px] truncate" title={rowLabel}>
+                            {rowLabel}
+                          </span>
                         </td>
                         {data.colLabels.map((_, c) => (
-                          <td key={c} className="p-2">
+                          <td key={c} className="p-2 align-middle">
                             <input
                               type="number"
                               min="0"
                               max="10"
                               value={data.payoffs[r][c]}
                               onChange={(e) => handlePayoffChange(r, c, e.target.value)}
-                              className="w-full px-3 py-2 text-center text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
+                              className="matrix-input w-full min-w-[3.5rem] px-2 py-2 text-center text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono tabular-nums"
                             />
                           </td>
                         ))}

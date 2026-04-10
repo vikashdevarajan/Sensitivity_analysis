@@ -7,6 +7,11 @@ interface GameAnalysisResponse {
   advisory: AdvisoryReport;
 }
 
+interface AIFetchResponse {
+  matrixData: MatrixData;
+  rawData: Array<Record<string, unknown>>;
+}
+
 export class ApiService {
   private static async fetchWithErrorHandling<T>(
     endpoint: string,
@@ -45,6 +50,13 @@ export class ApiService {
     return this.fetchWithErrorHandling<GameAnalysisResponse>('/analyze', {
       method: 'POST',
       body: JSON.stringify({ matrixData }),
+    });
+  }
+
+  static async fetchAIMatrix(prompt: string, segment?: string): Promise<AIFetchResponse> {
+    return this.fetchWithErrorHandling<AIFetchResponse>('/ai/fetch', {
+      method: 'POST',
+      body: JSON.stringify({ prompt, segment }),
     });
   }
 }
