@@ -12,3 +12,13 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.matrix-input::-webkit-outer-spin-button,
+.matrix-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.matrix-input {
+  -moz-appearance: textfield;
+}

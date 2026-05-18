@@ -75,6 +75,46 @@ class WeightSet(BaseModel):
     service: float = 0.15
     price: float = 0.1
 
+def _normalize_label(label: str) -> str:
+    return label.strip().lower()
+
+def _weight_key_for_label(label: str) -> str:
+    normalized = _normalize_label(label)
+    if "mileage" in normalized or "fuel" in normalized:
+        return "fuel"
+    if "safety" in normalized:
+        return "safety"
+    if "tech" in normalized or "feature" in normalized:
+        return "tech"
+    if "price" in normalized or "cost" in normalized:
+        return "price"
+    if "performance" in normalized or "engine" in normalized or "cc" in normalized:
+        return "service"
+    if "service" in normalized:
+        return "service"
+    return "service"
+
+def _criteria_keys_from_labels(labels: List[str]) -> List[str]:
+    keys = [_weight_key_for_label(label) for label in labels]
+    # Deduplicate while preserving order
+    seen = set()
+    ordered = []
+    for key in keys:
+        if key not in seen:
+            seen.add(key)
+            ordered.append(key)
+    return ordered
+
+def _weight_values_for_labels(labels: List[str], weights: WeightSet) -> List[float]:
+    key_to_weight = {
+        "fuel": weights.fuel,
+        "safety": weights.safety,
+        "tech": weights.tech,
+        "service": weights.service,
+        "price": weights.price,
+    }
+    return [key_to_weight[_weight_key_for_label(label)] for label in labels]
+
 def detect_product_context(entity_name: str, market_segment: str, your_product: str = None) -> ProductContext:
     """Detect product context based on company, market segment, and user's product"""
     entity_lower = entity_name.lower()
@@ -172,7 +212,7 @@ def calculate_criteria_sensitivity(data: MatrixData, base_weights: WeightSet) ->
     base_scores = calculate_utility_scores(data, base_weights)
     current_leader = max(base_scores.keys(), key=lambda x: base_scores[x])
     
-    criteria = ["fuel", "safety", "tech", "service", "price"]
+    criteria = _criteria_keys_from_labels(data.colLabels)
     
     for criterion in criteria:
         changes_count = 0
@@ -209,16 +249,19 @@ def calculate_criteria_sensitivity(data: MatrixData, base_weights: WeightSet) ->
 def generate_scenario_analysis(data: MatrixData, base_weights: WeightSet) -> List[ScenarioAnalysis]:
     """Generate what-if scenario analysis"""
     scenarios = []
-    
+    available = set(_criteria_keys_from_labels(data.colLabels))
+
     scenario_configs = [
         ("Safety Focus (+20%)", "safety", 0.20),
         ("Tech Innovation (+25%)", "tech", 0.25),
         ("Price Sensitivity (+15%)", "price", 0.15),
         ("Fuel Economy (+18%)", "fuel", 0.18),
-        ("Service Quality (+12%)", "service", 0.12)
+        ("Performance Focus (+12%)", "service", 0.12)
     ]
     
     for scenario_name, criterion, boost in scenario_configs:
+        if criterion not in available:
+            continue
         test_weights = WeightSet(**base_weights.model_dump())
         
         # Boost the criterion weight
@@ -369,7 +412,7 @@ def calculate_utility_scores(data: MatrixData, weights: WeightSet) -> Dict[str, 
     scores = {}
     
     # Convert weights to list matching column order
-    weight_values = [weights.fuel, weights.safety, weights.tech, weights.service, weights.price]
+    weight_values = _weight_values_for_labels(data.colLabels, weights)
     
     for i, car in enumerate(data.rowLabels):
         utility = sum(data.payoffs[i][j] * weight_values[j] for j in range(data.cols))
@@ -384,7 +427,7 @@ def find_tipping_points(data: MatrixData, base_weights: WeightSet) -> List[Dict[
     current_leader = max(base_scores.keys(), key=lambda x: base_scores[x])
     
     # Test each criterion's sensitivity
-    criteria = ["fuel", "safety", "tech", "service", "price"]
+    criteria = _criteria_keys_from_labels(data.colLabels)
     
     for i, criterion in enumerate(criteria):
         # Test what happens if we change this criterion's weight

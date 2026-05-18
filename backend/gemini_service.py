@@ -3,6 +3,7 @@ import os
 from typing import List
 import google.generativeai as genai
 from pydantic import BaseModel
+from config import GEMINI_ADVISORY_MODEL
 
 class MatrixData(BaseModel):
     rows: int
@@ -41,23 +42,7 @@ async def generate_advisory(data: MatrixData, results: SensitivityResults) -> Ad
     
     genai.configure(api_key=api_key)
     
-    # Try different model names for free tier
-    model_names = [
-        'gemini-pro',
-        'gemini-1.5-flash-latest',
-        'models/gemini-pro'
-    ]
-    
-    model = None
-    for model_name in model_names:
-        try:
-            model = genai.GenerativeModel(model_name)
-            test_response = model.generate_content("Hello")
-            print(f"Successfully connected using model: {model_name}")
-            break
-        except Exception as e:
-            print(f"Failed to use model {model_name}: {str(e)}")
-            continue
+    model = GEMINI_ADVISORY_MODEL
     
     if model is None:
         raise Exception("No working Gemini model found")
